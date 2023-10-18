@@ -25,10 +25,12 @@ if __name__ == "__main__":
 
     # Load sparse dataset
     X = csr_matrix(load_npz(args.X_file))
+    print('X')
+    print(X)
 
     train_df = pd.read_csv(f'data/{args.dataset}/preprocessed_data_train.csv', sep="\t")
     test_df = pd.read_csv(f'data/{args.dataset}/preprocessed_data_test.csv', sep="\t")
-    
+
     # Student-wise train-test split
     user_ids = X[:, 0].toarray().flatten()
     users_train = train_df["user_id"].unique()
@@ -36,9 +38,19 @@ if __name__ == "__main__":
     train = X[np.where(np.isin(user_ids, users_train))]
     test = X[np.where(np.isin(user_ids, users_test))]
 
+    print('Train Array')
+    print(train)
+    print('Test Array')
+    print(test)
+
     # First 5 columns are the original dataset, including label in column 3
     X_train, y_train = train[:, 5:], train[:, 3].toarray().flatten()
     X_test, y_test = test[:, 5:], test[:, 3].toarray().flatten()
+
+    print("X_train")
+    print(X_train)
+    print("y_train")
+    print(y_train)
 
     # Train
     model = LogisticRegression(solver="lbfgs", max_iter=args.iter)

@@ -59,6 +59,7 @@ def df_to_sparse(df, Q_mat, active_features):
 
     # Build feature rows by iterating over users
     for user_id in df["user_id"].unique():
+        print('user id', user_id)
         df_user = df[df["user_id"] == user_id][["user_id", "item_id", "timestamp", "correct", "skill_id"]].copy()
         df_user = df_user.values
         num_items_user = df_user.shape[0]
@@ -108,6 +109,8 @@ def df_to_sparse(df, Q_mat, active_features):
                 if 'sc' in active_features:
                     tmp = np.vstack((np.zeros(num_skills), skills))[:-1]
                     attempts[:, :num_skills] = phi(np.cumsum(tmp, 0) * skills)
+                    # print('sc phi')
+                    # print(phi(np.cumsum(tmp, 0) * skills))
 
                 # Past attempts for item
                 if 'ic' in active_features:
@@ -115,6 +118,8 @@ def df_to_sparse(df, Q_mat, active_features):
                     item_ids_onehot = onehot.fit_transform(item_ids).toarray()
                     tmp = np.vstack((np.zeros(item_ids_onehot.shape[1]), np.cumsum(item_ids_onehot, 0)))[:-1]
                     attempts[:, -2] = phi(tmp[np.arange(num_items_user), df_user[:, 1]])
+                    # print('ic phi')
+                    # print(phi(tmp[np.arange(num_items_user), df_user[:, 1]]))
 
                 # Past attempts for all items
                 if 'tc' in active_features:
@@ -181,6 +186,17 @@ def df_to_sparse(df, Q_mat, active_features):
     if 'i' in active_features:
         features['i'] = onehot.fit_transform(features["df"][:, 1].reshape(-1, 1))
 
+    print('features')
+    print(features)
+
+    print('a')
+    print(features['a'])
+
+    print('1')
+    print(sparse.csr_matrix(features['df']))
+    print('2')
+    print(sparse.hstack([features[x] for x in features.keys() if x != 'df']))
+
     X = sparse.hstack([sparse.csr_matrix(features['df']),
                        sparse.hstack([features[x] for x in features.keys() if x != 'df'])]).tocsr()
     return X
@@ -218,5 +234,18 @@ if __name__ == "__main__":
     active_features = [features for features in all_features if vars(args)[features]]
     features_suffix = ''.join(active_features)
 
+    print('df')
+    print(df.head())
+
+    print('Q_mat')
+    print(Q_mat)
+
+    print("active_features")
+    print(active_features)
+
     X = df_to_sparse(df, Q_mat, active_features)
+
+    print('X')
+    print(X)
+
     sparse.save_npz(os.path.join(data_path, f"X-{features_suffix}"), X)
