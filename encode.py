@@ -189,9 +189,6 @@ def df_to_sparse(df, Q_mat, active_features):
     print('features')
     print(features)
 
-    print('a')
-    print(features['a'])
-
     print('1')
     print(sparse.csr_matrix(features['df']))
     print('2')
